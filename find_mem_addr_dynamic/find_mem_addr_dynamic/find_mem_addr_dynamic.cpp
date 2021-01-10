@@ -6,6 +6,7 @@
 #include "intrin.h"
 #include <stdio.h>
 #include "wchar.h"
+#include "string.h"
 
 unsigned int Get_PEB(void);
 int _tmain(int argc, _TCHAR* argv[])
@@ -64,7 +65,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	int *kernel32_func_name;
 	int *kernel32_func_count;
 	typedef int func(void);
-	//func* f = (func*)0xdeadbeef;	
+	func* f1;// = (func*)0xdeadbeef;
+	func* f2;// = (func*)0xdeadbeef;
 	//int i = f();
 	//WinExec("something", 0)
 	//ExitProcess(0)
@@ -92,29 +94,21 @@ int _tmain(int argc, _TCHAR* argv[])
 			wprintf(L"Find Trio 0x%08x, 0x%08x, 0x%08x\n", *(kernel32_func_addr), *(kernel32_func_name), *(kernel32_func_count));
 			int *space = (int*)(*(dllbase_1)) + *(kernel32_func_name)/4;
 			int *space2 = (int*)(*(dllbase_1)) + *(kernel32_func_count)/4;
-			//short *space3 = (short*)(*(dllbase_1)) + *(kernel32_func_count)/4;
+			int *space3 = (int*)(*(dllbase_1)) + *(kernel32_func_addr)/4;
 			int name_counter = 0x00;
 			wprintf(L"Find name start addr 0x%08x, (0x%08x)\n", space, *(space));
-			//wprintf(L"Find num start addr 0x%08x, (0x%08x)\n", space2, *(space2));
-			//printf("test1 : %d\n", (short)*(space2));
-			//printf("test2 : %d\n", (short)*(space2+1));
-			//printf("test3 : %d\n", (short)*((short*)space2+1));
 			getchar();
 
-			/*
-			int *print_name_for_temp = (int*)(*(dllbase_1)+ *(space+name_counter));
-			//wprintf(L"@@@@@@@@@@@@@@@@@ 0x%08x, (0x%08x)\n", space+name_counter, *(space+name_counter));
-			wprintf(L"In loop addr 0x%08x, (0x%08x) start name at : [0x%08x]\n", space+name_counter, *(space+name_counter), print_name_for_temp);
-			printf("name Goccha : %s\n", print_name_for_temp);
-
-			wprintf(L"Find name start addr 0x%08x, (0x%08x)\n", space+0x01, *(space+0x01));
-			wprintf(L"Find name start addr 0x%08x, (0x%08x)\n", space+0x02, *(space+0x02));
-			*/
-			//getchar();
-			for(int inde=0;inde<10000;inde++){//while(1){
+			for(int inde=0;inde<1603;inde++){//while(1){	//I don't Know why there is 1603 loop but if it gets error if it's over
 				int *print_name_for_temp = (int*)(*(dllbase_1) + *(space+name_counter));
 				if(*(print_name_for_temp) == 0){
 					break;
+				}
+				if(strcmp((char*)print_name_for_temp, "WinExec") == 0){
+					int temp = (short)*((short*)space2+name_counter);
+					f1 = (func*) (*(dllbase_1) + *(space3+temp));
+					printf("%d@@@@0x%08x, 0x%08x@@@@ realaddr : 0x%08x\n", temp, space3+temp, *(space3+temp), f1);
+					goto find;
 				}
 				wprintf(L"In loop addr 0x%08x, (0x%08x) start name at : [0x%08x]\n", space+name_counter, *(space+name_counter), print_name_for_temp);
 				printf("name Goccha : %s\n", print_name_for_temp);

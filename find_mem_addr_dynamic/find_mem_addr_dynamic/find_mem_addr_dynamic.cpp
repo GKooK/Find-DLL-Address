@@ -30,7 +30,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int *firstinmemoryordermodulelist_basedllName_p = (int*)firstinmemoryordermodulelist_basedllName;
 	int name_addr = *(firstinmemoryordermodulelist_basedllName_p);
 	char*p2 = (char*)name_addr;
-	wprintf(L"The file name is : %s\n", p2);
+	//wprintf(L"The file name is : %s\n", p2);
 	char temp_sample[256] = {0,};
 	int index_sample = 0;
 	wchar_t kernel_string[] = L"KERNEL32.DLL";
@@ -52,8 +52,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	int *dllbase = (int*)(temp_basedllName_p+0x6);
 	char a_sumla_c = a_sulma;
 	int count_of_loop = 1;
-	printf("-----------------%d-----------------\n", count_of_loop);
-	wprintf(L"The next(%d) DLL is : %s\nDll Address is 0x%08x\n", count_of_loop, a_sulma, *(dllbase));
+	//printf("-----------------%d-----------------\n", count_of_loop);
+	//wprintf(L"The next(%d) DLL is : %s\nDll Address is 0x%08x\n", count_of_loop, a_sulma, *(dllbase));
 	next_link = temp_basedllName+8;
 	next_link_addr = (int*)next_link;
 	count_of_loop++;
@@ -64,15 +64,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	int *kernel32_func_addr;
 	int *kernel32_func_name;
 	int *kernel32_func_count;
-	typedef int func(void);
-	func* f1;// = (func*)0xdeadbeef;
-	func* f2;// = (func*)0xdeadbeef;
+	
+	typedef int func1(int);//ExitProcess
+	typedef int __stdcall func2(char*, int);//WinExec
+	func1* f1;// = (func*)0xdeadbeef;
+	func2* f2;// = (func*)0xdeadbeef;
 	//int i = f();
 	//WinExec("something", 0)
 	//ExitProcess(0)
 
 	while(1){
-		printf("-----------------%d-----------------\n", count_of_loop);
+		//printf("-----------------%d-----------------\n", count_of_loop);
 		int temp_basedllName_1 = *(next_link_addr)-8;
 		int *temp_basedllName_p_1 = (int*)(temp_basedllName_1);
 		int a_sulma_1 = *(temp_basedllName_p_1+0xc);
@@ -82,53 +84,52 @@ int _tmain(int argc, _TCHAR* argv[])
 			goto find;
 		}
 		if(wcscmp((wchar_t*)a_sulma_1, kernel_string)==0){
-			//printf("kernel32.dlladfaisdfhlashdfuashdfllasudhfl\n");
 			kernel32_dllbase = (int*)*(dllbase_1)+0x5a;
-			wprintf(L"I Want kernel32's data Directory : 0x%08x, *(0x%08x)\n", kernel32_dllbase, *(kernel32_dllbase));
+			//wprintf(L"I Want kernel32's data Directory : 0x%08x, *(0x%08x)\n", kernel32_dllbase, *(kernel32_dllbase));
 			kernel32_dllbase_data_dir = (int*)(*(dllbase_1)) + *(kernel32_dllbase)/4;
-			wprintf(L"I Want dllbase_data_dir : 0x%08x, *(0x%08x)\n", kernel32_dllbase_data_dir, *(kernel32_dllbase_data_dir));
+			//wprintf(L"I Want dllbase_data_dir : 0x%08x, *(0x%08x)\n", kernel32_dllbase_data_dir, *(kernel32_dllbase_data_dir));
 			kernel32_func_addr = (int*)(kernel32_dllbase_data_dir) + 0x7;
 			kernel32_func_name = (int*)(kernel32_dllbase_data_dir) + 0x8;
 			kernel32_func_count = (int*)(kernel32_dllbase_data_dir) + 0x9;
-			wprintf(L"Find Trio addr 0x%08x, 0x%08x, 0x%08x\n", kernel32_func_addr, kernel32_func_name, kernel32_func_count);
-			wprintf(L"Find Trio 0x%08x, 0x%08x, 0x%08x\n", *(kernel32_func_addr), *(kernel32_func_name), *(kernel32_func_count));
+			//wprintf(L"Find Trio addr 0x%08x, 0x%08x, 0x%08x\n", kernel32_func_addr, kernel32_func_name, kernel32_func_count);
+			//wprintf(L"Find Trio 0x%08x, 0x%08x, 0x%08x\n", *(kernel32_func_addr), *(kernel32_func_name), *(kernel32_func_count));
 			int *space = (int*)(*(dllbase_1)) + *(kernel32_func_name)/4;
 			int *space2 = (int*)(*(dllbase_1)) + *(kernel32_func_count)/4;
 			int *space3 = (int*)(*(dllbase_1)) + *(kernel32_func_addr)/4;
 			int name_counter = 0x00;
-			wprintf(L"Find name start addr 0x%08x, (0x%08x)\n", space, *(space));
-			getchar();
+			//wprintf(L"Find name start addr 0x%08x, (0x%08x)\n", space, *(space));
 
 			for(int inde=0;inde<1603;inde++){//while(1){	//I don't Know why there is 1603 loop but if it gets error if it's over
 				int *print_name_for_temp = (int*)(*(dllbase_1) + *(space+name_counter));
 				if(*(print_name_for_temp) == 0){
 					break;
 				}
+				if(strcmp((char*)print_name_for_temp, "ExitProcess") == 0){
+					int temp = (short)*((short*)space2+name_counter);
+					f1 = (func1*) (*(dllbase_1) + *(space3+temp));
+				}
 				if(strcmp((char*)print_name_for_temp, "WinExec") == 0){
 					int temp = (short)*((short*)space2+name_counter);
-					f1 = (func*) (*(dllbase_1) + *(space3+temp));
-					printf("%d@@@@0x%08x, 0x%08x@@@@ realaddr : 0x%08x\n", temp, space3+temp, *(space3+temp), f1);
-					goto find;
+					f2 = (func2*) (*(dllbase_1) + *(space3+temp));
+					goto find;//because i found all things that i need
 				}
-				wprintf(L"In loop addr 0x%08x, (0x%08x) start name at : [0x%08x]\n", space+name_counter, *(space+name_counter), print_name_for_temp);
-				printf("name Goccha : %s\n", print_name_for_temp);
-				printf("number Goccha : %d\n", (short)*((short*)space2+name_counter));
+				//Uncomment when you want to see the progress to reach each function in kernel32.dll
+				//wprintf(L"In loop addr 0x%08x, (0x%08x) start name at : [0x%08x]\n", space+name_counter, *(space+name_counter), print_name_for_temp);
+				//printf("name Goccha : %s\n", print_name_for_temp);
+				//printf("number Goccha : %d\n", (short)*((short*)space2+name_counter));
 				name_counter = name_counter + 0x01;
 			}
-		
 
-			//이후 이주소값을 다시 이용함.
-			//int *kernel32_dllbase_data_directory = (int*)(temp_basedllName_p_1+0x6+새로나온값);
-			//그
 		}
-		wprintf(L"The next(%d) DLL is : %s\nDll Address is 0x%08x\n", count_of_loop, a_sulma_1, *(dllbase_1));
+		//wprintf(L"The next(%d) DLL is : %s\nDll Address is 0x%08x\n", count_of_loop, a_sulma_1, *(dllbase_1));
 		next_link = *(next_link_addr+0x2)-8;
 		next_link_addr = (int*)next_link;
 		count_of_loop++;
 	}
 find:
-	printf("----------------END----------------\n");
-	getchar();
+	//printf("----------------END----------------\n");
+	f2("cmd", 5);// SW_SHOW == (int)5
+	f1(0);
 
 	return 0;
 }

@@ -2,11 +2,11 @@
 //
 
 #include "stdafx.h"
-#include "windows.h"
-#include "intrin.h"
 #include <stdio.h>
 #include "wchar.h"
 #include "string.h"
+//#include "windows.h"
+//#include "intrin.h"
 
 unsigned int Get_PEB(void);
 int _tmain(int argc, _TCHAR* argv[])
@@ -130,7 +130,7 @@ find:
 	//printf("----------------END----------------\n");
 	f2("cmd", 5);// SW_SHOW == (int)5
 	f1(0);
-
+	getchar();
 	return 0;
 }
 
